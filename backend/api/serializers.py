@@ -3,7 +3,7 @@ from djoser.serializers import TokenCreateSerializer, UserSerializer, UserCreate
 from rest_framework.fields import SerializerMethodField
 from rest_framework import serializers
 
-from recipes.models import Subscription
+from recipes.models import Tag, Subscription
 from users.models import User
 
 
@@ -52,3 +52,14 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 #             "email",
 #             "password",
 #         )
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = (
+            "id",
+            "name",
+            "color",
+            "slug",
+        )
