@@ -26,6 +26,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         'Ingredient',
         through='IngredientRecipe',
+        blank=False
     )
     tags = models.ManyToManyField(
         'Tag',
@@ -122,6 +123,7 @@ class IngredientRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
 
+# ПЕРЕПИСАТЬ RELATED NAMES!!!!!!
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
@@ -135,7 +137,7 @@ class ShoppingCart(models.Model):
     )
 
     def __str__(self):
-        return self.recipe
+        return self.recipe.name
 
     class Meta:
         constraints = (
@@ -173,6 +175,8 @@ class Subscription(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
 
+# убрать U
+
 
 class Favourite(models.Model):
     user = models.ForeignKey(
@@ -187,7 +191,7 @@ class Favourite(models.Model):
     )
 
     def __str__(self):
-        return self.recipe
+        return f"User: {self.user.username} Recipe: {self.recipe.name}"
 
     class Meta:
         constraints = (
