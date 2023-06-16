@@ -1,13 +1,11 @@
 import base64
 
 from django.core.files.base import ContentFile
-from rest_framework import serializers
-
 from djoser.serializers import TokenCreateSerializer, UserSerializer, UserCreateSerializer
-from rest_framework.fields import SerializerMethodField
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
-from recipes.models import Favourite, Ingredient, IngredientRecipe, Recipe, Tag, Subscription
+from recipes.models import Favorite, Ingredient, IngredientRecipe, Recipe, Tag, Subscription
 from users.models import User
 
 
@@ -104,7 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         recipe = instance.id
         try:
-            return user.keeper.filter(recipe=recipe).exists()
+            return user.favorites.filter(recipe=recipe).exists()
         except Exception:
             return False
 
@@ -112,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         recipe = instance.id
         try:
-            return user.user.filter(recipe=recipe).exists()
+            return user.shopping_carts.filter(recipe=recipe).exists()
         except Exception:
             return False
 
@@ -120,7 +118,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = SerializerMethodField(method_name='is_in_cart')
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(many=False, read_only=True)
-    ingredients = IngredientRecipeSerializer(many=True, read_only=False)
+    # ingredients = IngredientRecipeSerializer(many=True, read_only=False)
     image = Base64ImageField()
 
     class Meta:
@@ -129,7 +127,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "id",
             "tags",
             "author",
-            "ingredients",
+            # "ingredients",
             "is_favorited",
             "is_in_shopping_cart",
             "name",

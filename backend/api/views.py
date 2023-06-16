@@ -3,7 +3,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
 from api.serializers import FavoriteSerializer, IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer
-from recipes.models import Favourite, Ingredient, Recipe, Tag, Subscription
+from recipes.models import Favorite, Ingredient, Recipe, Tag, Subscription
 from users.models import User
 
 
@@ -22,8 +22,8 @@ class IngredientViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         queryset = Ingredient.objects.all()
-        name = self.request.query_params.get('name')
-        if name is not None:
+        name = self.request.query_params.get('name', None)
+        if name:
             name = name.strip().lower()
             queryset = queryset.filter(name__startswith=name).union(
                 queryset.filter(Q(name__contains=name) & ~Q(name__startswith=name)), all=True)
@@ -40,27 +40,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
-        is_favorited = self.request.query_params.get('is_favorited')
+        is_favorited = self.request.query_params.get('is_favorited', None)
         is_in_shopping_cart = self.request.query_params.get(
-            'is_in_shopping_cart')
-        author = self.request.query_params.get('author')
-        tags = self.request.query_params.get('tags')
-        if is_favorited is not None:
+            'is_in_shopping_cart', None)
+        author = self.request.query_params.get('author', None)
+        tags = self.request.query_params.getlist('tags', None)
+        if is_favorited:
             if is_favorited == '1':
                 queryset = queryset.filter(
-                    favourite__user=self.request.user.id)
+                    favorites__user=self.request.user.id)
             else:
                 queryset = queryset.exclude(
-                    favourite__user=self.request.user.id)
-        if is_in_shopping_cart is not None:
+                    favorites__user=self.request.user.id)
+        if is_in_shopping_cart:
             if is_in_shopping_cart == '1':
-                queryset = queryset.filter(recipe__user=self.request.user.id)
+                queryset = queryset.filter(shopping_carts__user=self.request.user.id)
             else:
-                queryset = queryset.exclude(recipe__user=self.request.user.id)
-        if author is not None:
+                queryset = queryset.exclude(shopping_carts__user=self.request.user.id)
+        if author:
             queryset = queryset.filter(author=author)
-        if tags is not None:
-            queryset = queryset.filter(tags__slug=tags)
+        if tags:
+            for tag in tags:
+                queryset = queryset.filter(tags__slug=tag)
         return queryset
 
     def perform_create(self, serializer):
@@ -73,13 +74,13 @@ class FavoriteViewSet(mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = FavoriteSerializer
-    queryset = Favourite.objects.all()
+    queryset = Favorite.objects.all()
 
     def create(self, serializer, **kwargs):
         user = self.request.user
         recipe = Recipe.objects.get(id=kwargs['recipe_id'])
         print(type(recipe))
-        Favourite.objects.create(
+        Favorite.objects.create(
             user=user,
             recipe=recipe,
         )
@@ -93,3 +94,13 @@ class FavoriteViewSet(mixins.CreateModelMixin,
 class SubscriptionViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializer
     queryset = Subscription.objects.all()
+
+
+
+# from recipes.models import *
+# q = Recipe.objects.get(id=1)
+# q.ingredients.all()
+
+# for ing in q.ingredients.all():
+#     for am in ing.ingredient_amounts.all():
+#         print(ing.name, ing.measurement_unit, am.amount)

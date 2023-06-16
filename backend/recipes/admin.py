@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from recipes.models import Favourite, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Subscription, Tag
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
+    Subscription,
+    Tag
+)
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -26,9 +34,11 @@ class IngredientAdmin(admin.ModelAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(Favourite)
+
+@admin.register(Favorite)
 class FavouriteAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
