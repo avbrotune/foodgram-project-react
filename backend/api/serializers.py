@@ -19,6 +19,20 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
+class RecipeMiniSerializer(serializers.ModelSerializer):
+
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            "id",
+            "name",
+            "image",
+            "cooking_time",
+        )
+
+
 class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
@@ -154,15 +168,39 @@ class FavoriteSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscriptionSerializer(serializers.Serializer):
-    author = CustomUserSerializer().data
+class SubscriptionSerializer(UserSerializer):
+
+    def is_sub(self, instance):
+        user = self.context['request'].user
+        author = instance.id
+        try:
+            return user.subscriber.filter(author=author).exists()
+        except Exception:
+            return False
+
+    def rec_count(self, instance):
+        return Recipe.objects.filter(author=instance.id).count()
+
+    def recipe_limit(self, instance):
+        limit = self.context['request'].query_params.get('recipes_limit', None)
+        recipes = Recipe.objects.filter(author=instance.id)
+        if limit:
+            recipes = recipes[:int(limit)]
+        return RecipeMiniSerializer(recipes, many=True).data
+
+    is_subscribed = SerializerMethodField(method_name='is_sub')
+    recipes = SerializerMethodField(method_name='recipe_limit')
+    recipes_count = SerializerMethodField(method_name='rec_count')
 
     class Meta:
-        model = Subscription
+        model = User
         fields = (
-            "author"
+            "username",
+            "email",
+            "id",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count"
         )
-
-    # def get_author(self, obj):
-    #     print()
-    #     return CustomUserSerializer().data
