@@ -7,7 +7,6 @@ from api.views import (
     IngredientViewSet,
     RecipeViewSet,
     TagViewSet,
-    SubscriptionViewSet
 )
 
 
@@ -17,7 +16,6 @@ router.register(r'users', CustomUserViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'recipes', RecipeViewSet)
 router.register(r'ingredients', IngredientViewSet, basename="ingridient")
-router.register(r'xx',SubscriptionViewSet)
 
 urlpatterns = [
     # path('', include('djoser.urls')),

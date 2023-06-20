@@ -1,7 +1,7 @@
 import base64
 
 from django.core.files.base import ContentFile
-from djoser.serializers import TokenCreateSerializer, UserSerializer, UserCreateSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
@@ -85,6 +85,19 @@ class TagSerializer(serializers.ModelSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
 
+    # def ing_amount(self, instance):
+
+    #     # print(obj.__dict__)
+    #     print(self)
+    #     # print(obj.amount)
+    #     # ingr_rec = IngredientRecipe.objects.get(ingredient=obj, recipe=obj)
+    #     # print(ingr_rec)
+    #     # return IngredientRecipeSerializer(obj.amount, many=False)
+    # amount = serializers.SerializerMethodField(method_name="ing_amount")
+    # print(amount)
+    # amount = serializers.IntegerField(source="ingredient_amounts.amount")
+    # amount = IngredientRecipeSerializer(many = True, read_only=False, source="ingredient_amounts")
+
     class Meta:
         model = Ingredient
         fields = (
@@ -94,10 +107,16 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
 
 
-class IngredientRecipeSerializer(serializers.ModelSerializer):
-    id = IngredientSerializer(many=False, read_only=False)
-    name = IngredientSerializer(many=True, read_only=False)
-    measurement_unit = IngredientSerializer(many=True, read_only=False)
+class IngredientRecipeSerializer(IngredientSerializer):
+    # ingredient_amounts = IngredientSerializer(many=True, read_only=False)
+    # id = IngredientSerializer(many=False, read_only=False)
+    # name = IngredientSerializer(many=True, read_only=False)
+    # measurement_unit = IngredientSerializer(many=True, read_only=False)
+    # ingredient_amounts = serializers.IntegerField(min_value=1)
+    def ing_amount(self, obj):
+        print(obj)
+
+    amount = serializers.SerializerMethodField(method_name="ing_amount")
 
     class Meta:
         model = IngredientRecipe
@@ -105,9 +124,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "measurement_unit",
-            "amount",
-        )
-        depth = 1
+            "amount",)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -132,7 +149,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = SerializerMethodField(method_name='is_in_cart')
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(many=False, read_only=True)
-    # ingredients = IngredientRecipeSerializer(many=True, read_only=False)
+    ingredients = IngredientRecipeSerializer(many=False)
     image = Base64ImageField()
 
     class Meta:
@@ -141,7 +158,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "id",
             "tags",
             "author",
-            # "ingredients",
+            "ingredients",
             "is_favorited",
             "is_in_shopping_cart",
             "name",
