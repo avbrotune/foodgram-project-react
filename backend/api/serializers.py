@@ -85,19 +85,6 @@ class TagSerializer(serializers.ModelSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
 
-    # def ing_amount(self, instance):
-
-    #     # print(obj.__dict__)
-    #     print(self)
-    #     # print(obj.amount)
-    #     # ingr_rec = IngredientRecipe.objects.get(ingredient=obj, recipe=obj)
-    #     # print(ingr_rec)
-    #     # return IngredientRecipeSerializer(obj.amount, many=False)
-    # amount = serializers.SerializerMethodField(method_name="ing_amount")
-    # print(amount)
-    # amount = serializers.IntegerField(source="ingredient_amounts.amount")
-    # amount = IngredientRecipeSerializer(many = True, read_only=False, source="ingredient_amounts")
-
     class Meta:
         model = Ingredient
         fields = (
@@ -107,16 +94,21 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
 
 
-class IngredientRecipeSerializer(IngredientSerializer):
-    # ingredient_amounts = IngredientSerializer(many=True, read_only=False)
-    # id = IngredientSerializer(many=False, read_only=False)
-    # name = IngredientSerializer(many=True, read_only=False)
-    # measurement_unit = IngredientSerializer(many=True, read_only=False)
-    # ingredient_amounts = serializers.IntegerField(min_value=1)
-    def ing_amount(self, obj):
-        print(obj)
+class IngredientRecipeSerializer(serializers.ModelSerializer):
 
-    amount = serializers.SerializerMethodField(method_name="ing_amount")
+    def get_ingredient_id(self, instance):
+        return instance.ingredient.id
+
+    def get_ingredient_name(self, instance):
+        return instance.ingredient.name
+
+    def get_ingredient_measurement_unit(self, instance):
+        return instance.ingredient.measurement_unit
+
+    id = serializers.SerializerMethodField(method_name="get_ingredient_id")
+    name = serializers.SerializerMethodField(method_name="get_ingredient_name")
+    measurement_unit = serializers.SerializerMethodField(
+        method_name="get_ingredient_measurement_unit")
 
     class Meta:
         model = IngredientRecipe
@@ -124,7 +116,8 @@ class IngredientRecipeSerializer(IngredientSerializer):
             "id",
             "name",
             "measurement_unit",
-            "amount",)
+            "amount",
+        )
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -145,11 +138,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         except Exception:
             return False
 
+    def ingrs(self, instance):
+        recipe = instance.id
+        queryset = IngredientRecipe.objects.filter(recipe=recipe)
+        return IngredientRecipeSerializer(queryset, many=True).data
+
     is_favorited = SerializerMethodField(method_name='is_fav')
     is_in_shopping_cart = SerializerMethodField(method_name='is_in_cart')
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(many=False, read_only=True)
-    ingredients = IngredientRecipeSerializer(many=False)
+    ingredients = SerializerMethodField(method_name="ingrs")
     image = Base64ImageField()
 
     class Meta:
@@ -168,21 +166,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
-    # user = serializers.StringRelatedField(
-    #     default=serializers.CurrentUserDefault()
-    # )
-    # name = serializers.StringRelatedField(
-    #     read_only = True
-    # )
-
-    class Meta:
-        model = Recipe
-        fields = (
-            "name",
-
-
-        )
 
 
 class SubscriptionSerializer(UserSerializer):

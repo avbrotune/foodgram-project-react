@@ -5,7 +5,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.serializers import RecipeMiniSerializer, CustomUserSerializer, FavoriteSerializer, IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer
+from api.serializers import RecipeMiniSerializer, CustomUserSerializer, IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer
 from recipes.models import Favorite, Ingredient, Recipe, Tag, Subscription, ShoppingCart
 from users.models import User
 
@@ -68,9 +68,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     http_method_names = ["get", "post", "patch", "head", "delete"]
-    # lookup_field = 'username'
-    # search_fields = ['username', ]
-    # ordering = ['id']
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
@@ -101,6 +98,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        print(serializer)
         serializer.save(
             author=self.request.user,
         )
