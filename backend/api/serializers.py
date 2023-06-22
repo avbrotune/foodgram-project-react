@@ -207,6 +207,14 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
             "cooking_time",
         )
 
+    def validate_ingredients(self, data):
+        for ingredient in data:
+            if "id" not in ingredient.keys() or "amount" not in ingredient.keys():
+                raise serializers.ValidationError(
+                    'Неверно указан игредиент.'
+                )
+        return data
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -233,7 +241,6 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
                 IngredientRecipe.objects.create(
                     ingredient=ingredient["id"], recipe=instance, amount=ingredient["amount"])
         if validated_data.get('tags'):
-            # print(instance.tags.all().clear())
             instance.tags.clear()
             tags = validated_data.get('tags')
             for tag in tags:

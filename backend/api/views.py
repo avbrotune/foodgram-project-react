@@ -3,9 +3,12 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.serializers import RecipeCreatePatchSerializer, RecipeMiniSerializer, CustomUserSerializer, IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer
+from api.serializers import (RecipeCreatePatchSerializer, RecipeMiniSerializer,
+                             IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer)
+from api.permissions import AdminOrAuthorOrReadOnly
 from recipes.models import Favorite, Ingredient, Recipe, Tag, Subscription, ShoppingCart
 from users.models import User
 
@@ -30,15 +33,21 @@ class CustomUserViewSet(UserViewSet):
         user = self.request.user
         author = self.get_object()
         if request.method == 'POST':
+            if Subscription.objects.filter(user=user, author=author).exists():
+                return Response({'error': "Вы уже подписаны на пользователя."}, status=status.HTTP_400_BAD_REQUEST)
+            if user == author:
+                return Response({'error': "Нельзя подписаться на самого себя."}, status=status.HTTP_400_BAD_REQUEST)
             sub = Subscription.objects.create(user=user, author=author)
             serializer = SubscriptionSerializer(
                 sub.author, context={'request': request}, many=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            instance = get_object_or_404(
-                Subscription, user=user, author=author)
-            self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if Subscription.objects.filter(user=user, author=author).exists():
+                instance = get_object_or_404(
+                    Subscription, user=user, author=author)
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': "Подписка на пользователя отсутствует."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -74,22 +83,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         is_favorited = self.request.query_params.get('is_favorited', None)
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart', None)
+        user = self.request.user.id
         author = self.request.query_params.get('author', None)
         tags = self.request.query_params.getlist('tags', None)
-        if is_favorited:
-            if is_favorited == '1':
-                queryset = queryset.filter(
-                    favorites__user=self.request.user.id)
-            else:
-                queryset = queryset.exclude(
-                    favorites__user=self.request.user.id)
-        if is_in_shopping_cart:
-            if is_in_shopping_cart == '1':
-                queryset = queryset.filter(
-                    shopping_carts__user=self.request.user.id)
-            else:
-                queryset = queryset.exclude(
-                    shopping_carts__user=self.request.user.id)
+        if is_favorited and user:
+            queryset = queryset.filter(
+                favorites__user=user)
+        if is_in_shopping_cart and user:
+            queryset = queryset.filter(
+                shopping_carts__user=user)
         if author:
             queryset = queryset.filter(author=author)
         if tags:
@@ -107,18 +109,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
             author=self.request.user,
         )
 
+    def get_permissions(self):
+        if self.action in ('favorite', 'download_shopping_cart', 'shopping_cart'):
+            return [IsAuthenticated(),]
+        return [AdminOrAuthorOrReadOnly(), ]
+
     @action(['post', 'delete'], detail=True)
     def favorite(self, request, *args, **kwargs):
         user = self.request.user
         recipe = self.get_object()
         if request.method == 'POST':
+            if Favorite.objects.filter(user=user, recipe=recipe).exists():
+                return Response({'error': "Рецепт уже добавлен в избранное."}, status=status.HTTP_400_BAD_REQUEST)
             Favorite.objects.create(user=user, recipe=recipe)
             serializer = RecipeMiniSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            instance = get_object_or_404(Favorite, user=user, recipe=recipe)
-            self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if Favorite.objects.filter(user=user, recipe=recipe).exists():
+                instance = get_object_or_404(
+                    Favorite, user=user, recipe=recipe)
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': "Рецепт отсутствует в избанном."}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(['get'], detail=False)
     def download_shopping_cart(self, request, *args, **kwargs):
@@ -146,11 +158,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         recipe = self.get_object()
         if request.method == 'POST':
+            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+                return Response({'error': "Рецепт уже есть в списке покупок."}, status=status.HTTP_400_BAD_REQUEST)
             ShoppingCart.objects.create(user=user, recipe=recipe)
             serializer = RecipeMiniSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            instance = get_object_or_404(
-                ShoppingCart, user=user, recipe=recipe)
-            self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+                instance = get_object_or_404(
+                    ShoppingCart, user=user, recipe=recipe)
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': "Рецепт отсутствует в списке покупок."}, status=status.HTTP_400_BAD_REQUEST)
