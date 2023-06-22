@@ -5,7 +5,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.serializers import RecipeMiniSerializer, CustomUserSerializer, IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer
+from api.serializers import RecipeCreatePatchSerializer, RecipeMiniSerializer, CustomUserSerializer, IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer
 from recipes.models import Favorite, Ingredient, Recipe, Tag, Subscription, ShoppingCart
 from users.models import User
 
@@ -97,8 +97,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(tags__slug=tag)
         return queryset
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST' or 'PATCH':
+            return RecipeCreatePatchSerializer
+        return RecipeSerializer
+
     def perform_create(self, serializer):
-        print(serializer)
         serializer.save(
             author=self.request.user,
         )
@@ -150,31 +154,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 ShoppingCart, user=user, recipe=recipe)
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# from recipes.models import *
-# q = Recipe.objects.get(id=1)
-# q.ingredients.all()
-
-# for ing in q.ingredients.all():
-#     for am in ing.ingredient_amounts.all():
-#         print(ing.name, ing.measurement_unit, am.amount)
-
-# User.objects.filter(user__subscriptions=request.user.id)
-
-
-# ok
-# from recipes.models import *
-# q = ShoppingCart.objects.filter(user=1)
-# res = dict()
-# for cart_object in q:
-#     for ingredient in cart_object.recipe.ingredients.all():
-#         for ingredient_recipe in ingredient.ingredient_amounts.filter(recipe=cart_object.recipe):
-        # name = ingredient.name
-        # if name in res:
-        #     res[name][1] += ingredient_recipe.amount
-        # else:
-        #     res[name] = [ingredient.measurement_unit, ingredient_recipe.amount]
-# print(res)
-# print(*sorted(res.items()))
-        # print(ingredient.name, ingredient.measurement_unit, ingredient_recipe.amount)

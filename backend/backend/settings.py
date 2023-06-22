@@ -109,7 +109,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru-RU'
+# LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
@@ -143,7 +144,6 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.SetPagination',
     'PAGE_SIZE': 6,
-    # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 
@@ -154,11 +154,6 @@ DJOSER = {
         'current_user': 'api.serializers.CustomUserSerializer',
         'user': 'api.serializers.CustomUserSerializer',
         'user_create': 'api.serializers.CustomUserCreateSerializer',
-        # 'token': 'api.serializers.CustomTokenCreateSerializer',
-        # 'token_create': 'api.serializers.CustomTokenCreateSerializer',
     },
 
 }
-
-
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

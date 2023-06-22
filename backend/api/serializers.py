@@ -62,9 +62,9 @@ class CustomUserSerializer(UserSerializer):
     class Meta:
         model = User
         fields = (
+            "id",
             "username",
             "email",
-            "id",
             "first_name",
             "last_name",
             "is_subscribed",
@@ -120,6 +120,19 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
         )
 
 
+class IngredientRecipeMiniSerializer(serializers.ModelSerializer):
+
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(), many=False)
+
+    class Meta:
+        model = IngredientRecipe
+        fields = (
+            "id",
+            "amount",
+        )
+
+
 class RecipeSerializer(serializers.ModelSerializer):
 
     def is_fav(self, instance):
@@ -143,9 +156,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         queryset = IngredientRecipe.objects.filter(recipe=recipe)
         return IngredientRecipeSerializer(queryset, many=True).data
 
+    # def tag_method_choose(self, instance):
+    #     if self.context.get('request').method == 'GET' or 'RETRIEVE':
+    #         print(TagSerializer(many=True, required = True))
+    #         return TagSerializer(many=True, required = True).data
+    #     else:
+        # return serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    # def validate(self, data):
+    #         if self.context.get('request').method == 'POST':
+    #             print(data)
+
     is_favorited = SerializerMethodField(method_name='is_fav')
     is_in_shopping_cart = SerializerMethodField(method_name='is_in_cart')
-    tags = TagSerializer(many=True, read_only=True)
+    # tags = SerializerMethodField(method_name="tag_method_choose")
+    tags = TagSerializer(many=True, required=True)
     author = CustomUserSerializer(many=False, read_only=True)
     ingredients = SerializerMethodField(method_name="ingrs")
     image = Base64ImageField()
@@ -166,6 +190,62 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
+class RecipeCreatePatchSerializer(serializers.ModelSerializer):
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True)
+    ingredients = IngredientRecipeMiniSerializer(many=True)
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            "tags",
+            "ingredients",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        instance = Recipe.objects.create(**validated_data)
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                ingredient=ingredient["id"], recipe=instance, amount=ingredient["amount"])
+        for tag in tags:
+            instance.tags.add(tag)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.image = validated_data.get('image', instance.image)
+        instance.cooking_time = validated_data.get(
+            'cooking_time',
+            instance.cooking_time
+        )
+        if validated_data.get('ingredients'):
+            IngredientRecipe.objects.filter(recipe=instance).delete()
+            ingredients = validated_data.get('ingredients')
+            for ingredient in ingredients:
+                IngredientRecipe.objects.create(
+                    ingredient=ingredient["id"], recipe=instance, amount=ingredient["amount"])
+        if validated_data.get('tags'):
+            # print(instance.tags.all().clear())
+            instance.tags.clear()
+            tags = validated_data.get('tags')
+            for tag in tags:
+                instance.tags.add(tag)
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        return RecipeSerializer(
+            instance,
+            context={'request': self.context.get('request')}
+        ).data
 
 
 class SubscriptionSerializer(UserSerializer):
