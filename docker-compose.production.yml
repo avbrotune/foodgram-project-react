@@ -31,7 +31,7 @@ services:
     image: avbro/foodgram_gateway
     env_file: .env
     volumes:
-      - static_volume:/static/
+      - static_volume:/static
       - media_volume:/media
     ports:
       - 8000:80

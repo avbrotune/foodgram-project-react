@@ -28,7 +28,7 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ("name", "measurement_unit")
-    list_filter = ["name",]
+    list_filter = ["name", ]
 
 
 @admin.register(Subscription)

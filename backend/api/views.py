@@ -121,7 +121,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ('favorite',
                            'download_shopping_cart', 'shopping_cart'):
-            return [IsAuthenticated(),]
+            return [IsAuthenticated(), ]
         return [AdminOrAuthorOrReadOnly(), ]
 
     @action(['post', 'delete'], detail=True)
