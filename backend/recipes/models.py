@@ -46,7 +46,7 @@ class Recipe(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return f"{self.name}, автор - {self.author}"
 
     class Meta:
         verbose_name = 'Рецепт'

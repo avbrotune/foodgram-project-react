@@ -18,7 +18,13 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
+    list_display = ("name", "author", "show_favorite")
+    list_filter = ["author", "name", "tags"]
 
+    def show_favorite(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
+
+    show_favorite.short_description = "Добавлено в избранное, раз"
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -27,7 +33,8 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("name", "measurement_unit")
+    list_filter = ["name",]
 
 
 @admin.register(Subscription)
