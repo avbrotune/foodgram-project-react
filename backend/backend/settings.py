@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-$*!$202)y$iazb+n7czhvbqjilv6o^_arj%cyhu(z*8rwgt*nb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['158.160.28.13', '127.0.0.1', 'localhost', 'nomatter.hopto.org']
 
 
 # Application definition
