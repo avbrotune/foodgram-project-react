@@ -1,14 +1,7 @@
 from django.contrib import admin
 
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    IngredientRecipe,
-    Recipe,
-    ShoppingCart,
-    Subscription,
-    Tag
-)
+from recipes.models import (Favorite, Ingredient, IngredientRecipe,
+                            Recipe, ShoppingCart, Subscription, Tag)
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -25,6 +18,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return Favorite.objects.filter(recipe=obj).count()
 
     show_favorite.short_description = "Добавлено в избранное, раз"
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

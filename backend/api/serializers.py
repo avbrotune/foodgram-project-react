@@ -5,7 +5,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from recipes.models import Favorite, Ingredient, IngredientRecipe, Recipe, Tag, Subscription
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from users.models import User
 
 
@@ -161,7 +161,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     #         print(TagSerializer(many=True, required = True))
     #         return TagSerializer(many=True, required = True).data
     #     else:
-        # return serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+        # return serializers.PrimaryKeyRelatedField(
+        #     queryset=Tag.objects.all(), many=True)
     # def validate(self, data):
     #         if self.context.get('request').method == 'POST':
     #             print(data)
@@ -209,7 +210,8 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, data):
         for ingredient in data:
-            if "id" not in ingredient.keys() or "amount" not in ingredient.keys():
+            if ("id" not in ingredient.keys()
+                    or "amount" not in ingredient.keys()):
                 raise serializers.ValidationError(
                     'Неверно указан игредиент.'
                 )
@@ -221,7 +223,8 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         instance = Recipe.objects.create(**validated_data)
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
-                ingredient=ingredient["id"], recipe=instance, amount=ingredient["amount"])
+                ingredient=ingredient["id"],
+                recipe=instance, amount=ingredient["amount"])
         for tag in tags:
             instance.tags.add(tag)
         return instance
@@ -239,7 +242,8 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
             ingredients = validated_data.get('ingredients')
             for ingredient in ingredients:
                 IngredientRecipe.objects.create(
-                    ingredient=ingredient["id"], recipe=instance, amount=ingredient["amount"])
+                    ingredient=ingredient["id"],
+                    recipe=instance, amount=ingredient["amount"])
         if validated_data.get('tags'):
             instance.tags.clear()
             tags = validated_data.get('tags')

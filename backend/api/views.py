@@ -7,9 +7,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.serializers import (RecipeCreatePatchSerializer, RecipeMiniSerializer,
-                             IngredientSerializer, RecipeSerializer, TagSerializer, SubscriptionSerializer)
+                             IngredientSerializer, RecipeSerializer,
+                             TagSerializer, SubscriptionSerializer)
 from api.permissions import AdminOrAuthorOrReadOnly
-from recipes.models import Favorite, Ingredient, Recipe, Tag, Subscription, ShoppingCart
+from recipes.models import (Favorite, Ingredient,
+                            Recipe, Tag, Subscription, ShoppingCart)
 from users.models import User
 
 
@@ -34,9 +36,13 @@ class CustomUserViewSet(UserViewSet):
         author = self.get_object()
         if request.method == 'POST':
             if Subscription.objects.filter(user=user, author=author).exists():
-                return Response({'error': "Вы уже подписаны на пользователя."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'error': "Вы уже подписаны на пользователя."},
+                    status=status.HTTP_400_BAD_REQUEST)
             if user == author:
-                return Response({'error': "Нельзя подписаться на самого себя."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'error': "Нельзя подписаться на самого себя."},
+                    status=status.HTTP_400_BAD_REQUEST)
             sub = Subscription.objects.create(user=user, author=author)
             serializer = SubscriptionSerializer(
                 sub.author, context={'request': request}, many=False)
@@ -47,7 +53,9 @@ class CustomUserViewSet(UserViewSet):
                     Subscription, user=user, author=author)
                 self.perform_destroy(instance)
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response({'error': "Подписка на пользователя отсутствует."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': "Подписка на пользователя отсутствует."},
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -69,7 +77,8 @@ class IngredientViewSet(mixins.ListModelMixin,
         if name:
             name = name.strip().lower()
             queryset = queryset.filter(name__startswith=name).union(
-                queryset.filter(Q(name__contains=name) & ~Q(name__startswith=name)), all=True)
+                queryset.filter(Q(name__contains=name)
+                                & ~Q(name__startswith=name)), all=True)
         return queryset
 
 
@@ -110,7 +119,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.action in ('favorite', 'download_shopping_cart', 'shopping_cart'):
+        if self.action in ('favorite',
+                           'download_shopping_cart', 'shopping_cart'):
             return [IsAuthenticated(),]
         return [AdminOrAuthorOrReadOnly(), ]
 
@@ -120,7 +130,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         if request.method == 'POST':
             if Favorite.objects.filter(user=user, recipe=recipe).exists():
-                return Response({'error': "Рецепт уже добавлен в избранное."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "Рецепт уже добавлен в избранное."},
+                                status=status.HTTP_400_BAD_REQUEST)
             Favorite.objects.create(user=user, recipe=recipe)
             serializer = RecipeMiniSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -130,7 +141,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     Favorite, user=user, recipe=recipe)
                 self.perform_destroy(instance)
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response({'error': "Рецепт отсутствует в избанном."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "Рецепт отсутствует в избанном."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @action(['get'], detail=False)
     def download_shopping_cart(self, request, *args, **kwargs):
@@ -139,7 +151,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         res = dict()
         for cart_object in cart:
             for ingredient in cart_object.recipe.ingredients.all():
-                for ingredient_recipe in ingredient.ingredient_amounts.filter(recipe=cart_object.recipe):
+                for ingredient_recipe in ingredient.ingredient_amounts.filter(
+                        recipe=cart_object.recipe):
                     name = ingredient.name.capitalize()
                     if name in res:
                         res[name][1] += ingredient_recipe.amount
@@ -151,7 +164,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
             f.close()
 
-            return Response(open('shopping_list.txt'), content_type='text/plain', status=status.HTTP_200_OK)
+            return Response(open('shopping_list.txt'),
+                            content_type='text/plain',
+                            status=status.HTTP_200_OK)
 
     @action(['post', 'delete'], detail=True)
     def shopping_cart(self, request, *args, **kwargs):
@@ -159,7 +174,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         if request.method == 'POST':
             if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-                return Response({'error': "Рецепт уже есть в списке покупок."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "Рецепт уже есть в списке покупок."},
+                                status=status.HTTP_400_BAD_REQUEST)
             ShoppingCart.objects.create(user=user, recipe=recipe)
             serializer = RecipeMiniSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -169,4 +185,5 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     ShoppingCart, user=user, recipe=recipe)
                 self.perform_destroy(instance)
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response({'error': "Рецепт отсутствует в списке покупок."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "Рецепт отсутствует в списке покупок."},
+                            status=status.HTTP_400_BAD_REQUEST)
