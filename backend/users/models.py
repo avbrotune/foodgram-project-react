@@ -1,8 +1,26 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
 class User(AbstractUser):
+    def validate_username(value):
+        """
+        Недопустимо использовать имя пользователя me.
+        """
+        if value == 'me':
+            raise ValidationError(
+                ('Недопустимый логин "me"'),
+            )
+
+    username = models.CharField(
+        'Логин',
+        validators=(UnicodeUsernameValidator(), validate_username,),
+        max_length=150,
+        unique=True,
+        null=False,
+    )
     email = models.EmailField(
         "Электронная почта",
         help_text=(
