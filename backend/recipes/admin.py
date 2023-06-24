@@ -16,11 +16,11 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ("image_tag", "name", "author", "show_favorite")
     list_filter = ("author", "name", "tags")
 
-    @admin.display(short_description="Изображение блюда")
+    @admin.display(description="Изображение блюда")
     def image_tag(self, obj):
         return format_html('<img src="{}" />'.format(obj.image.url))
 
-    @admin.display(short_description="Добавлено в избранное, раз")
+    @admin.display(description="Добавлено в избранное, раз")
     def show_favorite(self, obj):
         return Favorite.objects.filter(recipe=obj).count()
 
