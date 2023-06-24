@@ -1,8 +1,7 @@
-from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
-User = get_user_model()
+from users.models import User
 
 
 class Recipe(models.Model):
@@ -35,12 +34,16 @@ class Recipe(models.Model):
         blank=False,
         related_name="recipes"
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         validators=[
             MinValueValidator(
                 1,
                 message='Минимальное значение 1'
+            ),
+            MaxValueValidator(
+                1,
+                message='Максимальное значение 10000'
             ),
         ],
     )
@@ -110,12 +113,16 @@ class IngredientRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredient_amounts'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         validators=[
             MinValueValidator(
                 1,
                 message='Минимальное значение 1'
+            ),
+            MaxValueValidator(
+                1,
+                message='Максимальное значение 10000'
             ),
         ],
     )

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from recipes.models import (Favorite, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Subscription, Tag)
@@ -6,41 +7,45 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe,
 
 class RecipeIngredientInline(admin.TabularInline):
     model = IngredientRecipe
+    min_num = 1
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
-    list_display = ("name", "author", "show_favorite")
-    list_filter = ["author", "name", "tags"]
+    list_display = ("image_tag", "name", "author", "show_favorite")
+    list_filter = ("author", "name", "tags")
 
+    @admin.display(short_description="Изображение блюда")
+    def image_tag(self, obj):
+        return format_html('<img src="{}" />'.format(obj.image.url))
+
+    @admin.display(short_description="Добавлено в избранное, раз")
     def show_favorite(self, obj):
         return Favorite.objects.filter(recipe=obj).count()
-
-    show_favorite.short_description = "Добавлено в избранное, раз"
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    pass
+    ...
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ("name", "measurement_unit")
-    list_filter = ["name", ]
+    list_filter = ("name", )
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    pass
+    ...
 
 
 @admin.register(Favorite)
 class FavouriteAdmin(admin.ModelAdmin):
-    pass
+    ...
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    pass
+    ...
