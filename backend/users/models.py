@@ -24,8 +24,8 @@ class User(AbstractUser):
     email = models.EmailField(
         "Электронная почта",
         help_text=(
-            'Required. 150 characters or fewer.\
-                  Letters, digits and @/./+/-/_ only.'),
+            'Обязательное поле. Не более 150 символов.\
+                  Только латинские буквы, цифры и симовлы @/./+/-/_.'),
         max_length=254,
         blank=False,
         unique=True
@@ -43,4 +43,12 @@ class User(AbstractUser):
         null=False,
     )
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['email', 'last_name', 'first_name', 'username']
+    REQUIRED_FIELDS = ['last_name', 'first_name', 'username']
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+    class Meta:
+        ordering = ['last_name', ]
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
