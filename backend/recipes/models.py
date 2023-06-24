@@ -43,7 +43,7 @@ class Recipe(models.Model):
                 message='Минимальное значение 1'
             ),
             MaxValueValidator(
-                1,
+                10000,
                 message='Максимальное значение 10000'
             ),
         ],
@@ -124,7 +124,7 @@ class IngredientRecipe(models.Model):
                 message='Минимальное значение 1'
             ),
             MaxValueValidator(
-                1,
+                10000,
                 message='Максимальное значение 10000'
             ),
         ],
