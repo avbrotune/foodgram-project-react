@@ -5,7 +5,9 @@ from django.db import models
 class User(AbstractUser):
     email = models.EmailField(
         "Электронная почта",
-        help_text=('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
+        help_text=(
+            'Required. 150 characters or fewer.\
+                  Letters, digits and @/./+/-/_ only.'),
         max_length=254,
         blank=False,
         unique=True
