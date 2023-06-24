@@ -18,7 +18,8 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description="Изображение блюда")
     def image_tag(self, obj):
-        return format_html('<img src="{}" />'.format(obj.image.url))
+        return format_html('<img src="{}" style="width: 130px; \
+                           height: 100px"/>'.format(obj.image.url))
 
     @admin.display(description="Добавлено в избранное, раз")
     def show_favorite(self, obj):
