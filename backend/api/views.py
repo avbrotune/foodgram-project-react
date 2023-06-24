@@ -57,6 +57,12 @@ class CustomUserViewSet(UserViewSet):
                 {'error': "Подписка на пользователя отсутствует."},
                 status=status.HTTP_400_BAD_REQUEST)
 
+    def get_permissions(self):
+        if self.action in ('subscribe',
+                           'subscriptions'):
+            return [IsAuthenticated, ]
+        return super(self.__class__, self).get_permissions()
+
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
