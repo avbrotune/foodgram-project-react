@@ -138,32 +138,6 @@ class IngredientRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="shopping_carts",
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name="shopping_carts",
-    )
-
-    def __str__(self):
-        return self.recipe.name
-
-    class Meta:
-        constraints = (
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='uniq_cart'
-            ),
-        )
-        verbose_name = 'Список покупок'
-        verbose_name_plural = 'Списки покупок'
-
-
 class Subscription(models.Model):
     user = models.ForeignKey(
         User,
@@ -190,27 +164,45 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
 
 
-class Favorite(models.Model):
+class CommonCartFavorite(models.Model):
+
+    class Meta:
+        abstract = True
+        constraints = (
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='uniq_%(class)s'
+            ),
+        )
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="favorites",
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="favorites",
     )
 
-    def __str__(self):
-        return f"User: {self.user.username} Recipe: {self.recipe.name}"
 
-    class Meta:
-        constraints = (
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='uniq_favourite'
-            ),
-        )
+class ShoppingCart(CommonCartFavorite):
+
+    class Meta(CommonCartFavorite.Meta):
+        default_related_name = "shopping_carts"
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return self.recipe.name
+
+
+class Favorite(CommonCartFavorite):
+
+    class Meta(CommonCartFavorite.Meta):
+        default_related_name = "favorites"
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
+
+    def __str__(self):
+        return f"User: {self.user.username} \
+            Recipe: {self.recipe.name}"
