@@ -163,12 +163,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # filename = "Список покупок.txt"
         # for obj in sorted(res.items()):
         #     content.join(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
-        with open('Список покупок.txt', 'w') as f:
-            for obj in sorted(res.items()):
-                f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
-            f.close()
+        # with open('Список покупок.txt', 'w') as f:
+        #     for obj in sorted(res.items()):
+        #         f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
+        #     f.close()
 
-            return Response(open('Список покупок.txt'),
+        return Response(res,
                             content_type='text/plain',
                             status=status.HTTP_200_OK)
         # response = Response(content,
