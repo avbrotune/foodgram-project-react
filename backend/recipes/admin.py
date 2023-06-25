@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.html import format_html
+# from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from recipes.models import (Favorite, Ingredient, IngredientRecipe,
@@ -20,7 +20,8 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description="Изображение блюда")
     def image_tag(self, obj):
 
-        return mark_safe('<img src="recipes/images/%s" width="130" height="100" />' % (self.image))
+        return mark_safe('<img src="recipes/images/%s" \
+                         width="130" height="100" />' % (self.image))
         # return format_html('<img src="{}" style="width: 130px; \
         #                    height: 100px"/>'.format(obj.image.url))
 
