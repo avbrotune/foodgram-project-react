@@ -24,8 +24,14 @@ class RecipeAdmin(admin.ModelAdmin):
     #                      width="130" height="100" />' % (obj.image.))
     #     return format_html('<img src="{}" style="width: 130px; \
     #                        height: 100px"/>'.format(obj.image.url))
-    #     return format_html_join(mark_safe('<br>'), '{}', ((line,) for line in instance.get_full_address()),
-    #                             ) or mark_safe("<span class='errors'>I can't determine this address.</span>")
+    # return format_html_join(mark_safe('<br>'), '{}',
+    #                         ((line,) for line in
+    #  instance.get_full_address()),
+    #                         ) or mark_safe(
+    #                             "<span \
+    #                                 class='errors'>I\
+    #                                       can't determine\
+    #                                           this address.</span>")
 
     @admin.display(description="Добавлено в избранное, раз")
     def show_favorite(self, obj):
