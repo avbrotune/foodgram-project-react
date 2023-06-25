@@ -21,7 +21,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
 
         return mark_safe('<img src="recipes/images/%s" \
-                         width="130" height="100" />' % (self.image))
+                         width="130" height="100" />' % (obj.image.url))
         # return format_html('<img src="{}" style="width: 130px; \
         #                    height: 100px"/>'.format(obj.image.url))
 
