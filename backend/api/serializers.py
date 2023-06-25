@@ -75,23 +75,15 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = (
-            "id",
-            "name",
-            "color",
-            "slug",
-        )
+        # fields = ("__all__",)
+        read_only_fields = ("__all__",)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = (
-            "id",
-            "name",
-            "measurement_unit",
-        )
+        fields = ("__all__",)
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
@@ -138,41 +130,24 @@ class RecipeSerializer(serializers.ModelSerializer):
     def is_fav(self, instance):
         user = self.context['request'].user
         recipe = instance.id
-        try:
-            return user.favorites.filter(recipe=recipe).exists()
-        except Exception:
-            return False
+        return user.favorites.filter(recipe=recipe).exists()
 
     def is_in_cart(self, instance):
         user = self.context['request'].user
         recipe = instance.id
-        try:
-            return user.shopping_carts.filter(recipe=recipe).exists()
-        except Exception:
-            return False
+        return user.shopping_carts.filter(recipe=recipe).exists()
 
-    def ingrs(self, instance):
+    def get_ingredients_with_amount(self, instance):
         recipe = instance.id
         queryset = IngredientRecipe.objects.filter(recipe=recipe)
         return IngredientRecipeSerializer(queryset, many=True).data
 
-    # def tag_method_choose(self, instance):
-    #     if self.context.get('request').method == 'GET' or 'RETRIEVE':
-    #         print(TagSerializer(many=True, required = True))
-    #         return TagSerializer(many=True, required = True).data
-    #     else:
-        # return serializers.PrimaryKeyRelatedField(
-        #     queryset=Tag.objects.all(), many=True)
-    # def validate(self, data):
-    #         if self.context.get('request').method == 'POST':
-    #             print(data)
-
     is_favorited = SerializerMethodField(method_name='is_fav')
     is_in_shopping_cart = SerializerMethodField(method_name='is_in_cart')
-    # tags = SerializerMethodField(method_name="tag_method_choose")
     tags = TagSerializer(many=True, required=True)
     author = CustomUserSerializer(many=False, read_only=True)
-    ingredients = SerializerMethodField(method_name="ingrs")
+    ingredients = SerializerMethodField(
+        method_name="get_ingredients_with_amount")
     image = Base64ImageField()
 
     class Meta:
