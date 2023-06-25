@@ -169,8 +169,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         #     f.close()
 
         return Response(res,
-                            content_type='text/plain',
-                            status=status.HTTP_200_OK)
+                        content_type='text/plain',
+                        status=status.HTTP_200_OK)
         # response = Response(content,
         #                     content_type='text/plain',
         #                     status=status.HTTP_200_OK)
