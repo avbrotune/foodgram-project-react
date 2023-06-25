@@ -52,10 +52,7 @@ class CustomUserSerializer(UserSerializer):
     def is_sub(self, instance):
         user = self.context['request'].user
         author = instance.id
-        try:
-            return user.subscriber.filter(author=author).exists()
-        except Exception:
-            return False
+        return user.subscriber.filter(author=author).exists()
 
     is_subscribed = SerializerMethodField(method_name='is_sub')
 
@@ -249,10 +246,7 @@ class SubscriptionSerializer(UserSerializer):
     def is_sub(self, instance):
         user = self.context['request'].user
         author = instance.id
-        try:
-            return user.subscriber.filter(author=author).exists()
-        except Exception:
-            return False
+        return user.subscriber.filter(author=author).exists()
 
     def rec_count(self, instance):
         return Recipe.objects.filter(author=instance.id).count()
