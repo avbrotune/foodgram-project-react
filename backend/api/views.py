@@ -1,9 +1,9 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from api.serializers import (RecipeCreatePatchSerializer, RecipeMiniSerializer,
@@ -61,6 +61,8 @@ class CustomUserViewSet(UserViewSet):
         if self.action in ('subscribe',
                            'subscriptions'):
             return [IsAuthenticated(), ]
+        if self.action in permissions.SAFE_METHODS:
+            return [AllowAny(),]
         return super(self.__class__, self).get_permissions()
 
 
