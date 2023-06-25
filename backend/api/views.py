@@ -159,10 +159,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     else:
                         res[name] = [ingredient.measurement_unit,
                                      ingredient_recipe.amount]
-        content = ''
+        content = []
         # filename = "Список покупок.txt"
         for obj in sorted(res.items()):
-            content += f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n'
+            content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}')
         # with open('Список покупок.txt', 'w') as f:
         #     for obj in sorted(res.items()):
         #         f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
