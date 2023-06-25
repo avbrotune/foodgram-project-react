@@ -159,24 +159,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     else:
                         res[name] = [ingredient.measurement_unit,
                                      ingredient_recipe.amount]
-        content = ''
-        filename = "Список покупок.txt"
-        for obj in sorted(res.items()):
-            content.join(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
-        # with open('Список покупок.txt', 'w') as f:
-        #     for obj in sorted(res.items()):
-        #         f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
-        #     f.close()
+        # content = ''
+        # filename = "Список покупок.txt"
+        # for obj in sorted(res.items()):
+        #     content.join(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
+        with open('Список покупок.txt', 'w') as f:
+            for obj in sorted(res.items()):
+                f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}')
+            f.close()
 
-            # return Response(open('Список покупок.txt'),
-            #                 content_type='text/plain',
-            #                 status=status.HTTP_200_OK)
-        response = Response(content,
+            return Response(open('Список покупок.txt'),
                             content_type='text/plain',
                             status=status.HTTP_200_OK)
-        response['Content-Disposition'] = 'attachment; \
-            filename={0}'.format(filename)
-        return response
+        # response = Response(content,
+        #                     content_type='text/plain',
+        #                     status=status.HTTP_200_OK)
+        # response['Content-Disposition'] = 'attachment; \
+        #     filename={0}'.format(filename)
+        # return response
 
     @action(['post', 'delete'], detail=True)
     def shopping_cart(self, request, *args, **kwargs):
