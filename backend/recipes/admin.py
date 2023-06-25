@@ -1,6 +1,6 @@
 from django.contrib import admin
 # from django.utils.html import format_html
-from django.utils.safestring import mark_safe
+# from django.utils.safestring import mark_safe
 
 from recipes.models import (Favorite, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Subscription, Tag)
@@ -17,13 +17,15 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ("image_tag", "name", "author", "show_favorite")
     list_filter = ("author", "name", "tags")
 
-    @admin.display(description="Изображение блюда")
-    def image_tag(self, obj):
+    # @admin.display(description="Изображение блюда")
+    # def image_tag(self, obj):
 
-        return mark_safe('<img src="recipes/images/%s" \
-                         width="130" height="100" />' % (obj.image))
-        # return format_html('<img src="{}" style="width: 130px; \
-        #                    height: 100px"/>'.format(obj.image.url))
+    #     return mark_safe('<img src="recipes/images/%s" \
+    #                      width="130" height="100" />' % (obj.image.))
+    #     return format_html('<img src="{}" style="width: 130px; \
+    #                        height: 100px"/>'.format(obj.image.url))
+    #     return format_html_join(mark_safe('<br>'), '{}', ((line,) for line in instance.get_full_address()),
+    #                             ) or mark_safe("<span class='errors'>I can't determine this address.</span>")
 
     @admin.display(description="Добавлено в избранное, раз")
     def show_favorite(self, obj):
