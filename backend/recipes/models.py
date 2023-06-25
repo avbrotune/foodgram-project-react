@@ -54,10 +54,6 @@ class Recipe(models.Model):
     def __str__(self):
         return f"{self.name}, автор - {self.author}"
 
-    def image_tag(self):
-        return mark_safe('<img src="/recipes/images/%s" \
-                         width="130" height="100" />' % (self.image))
-
     class Meta:
         ordering = ['-pub_date', ]
         verbose_name = 'Рецепт'
