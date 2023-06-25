@@ -75,7 +75,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        # fields = ("__all__",)
+        fields = ("__all__",)
         read_only_fields = ("__all__",)
 
 

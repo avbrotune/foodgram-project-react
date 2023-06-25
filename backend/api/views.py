@@ -161,8 +161,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                      ingredient_recipe.amount]
         content = 'xxx'
         # filename = "Список покупок.txt"
-        # for obj in sorted(res.items()):
-        #     content.join(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
+        for obj in sorted(res.items()):
+            content = content + f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n'
         # with open('Список покупок.txt', 'w') as f:
         #     for obj in sorted(res.items()):
         #         f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
