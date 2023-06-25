@@ -165,7 +165,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         #     content.join(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
         with open('Список покупок.txt', 'w') as f:
             for obj in sorted(res.items()):
-                f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}')
+                f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
             f.close()
 
             return Response(open('Список покупок.txt'),
