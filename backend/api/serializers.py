@@ -218,7 +218,7 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         instance = Recipe.objects.create(
             **validated_data,
-            author=self.context['request'].user.id
+            author=self.context['request'].user
         )
         ingredients_in_recipe = []
         for ingredient in ingredients:
