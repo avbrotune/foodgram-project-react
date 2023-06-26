@@ -208,7 +208,7 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             ingredients_in_recipe.append(
                 IngredientRecipe(
-                    ngredient=ingredient["id"],
+                    ingredient=ingredient["id"],
                     recipe=instance,
                     amount=ingredient["amount"]
                 )
