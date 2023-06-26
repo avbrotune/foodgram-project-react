@@ -49,7 +49,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserSerializer(UserSerializer):
 
-    def is_sub(self, instance):
+    def get_is_subscribed(self, instance):
         request = self.context['request']
         return (request
                 and request.user.is_authenticated
@@ -57,7 +57,7 @@ class CustomUserSerializer(UserSerializer):
                     author=instance.id
                 ).exists())
 
-    is_subscribed = SerializerMethodField(method_name='is_sub')
+    is_subscribed = SerializerMethodField()
 
     class Meta:
         model = User
