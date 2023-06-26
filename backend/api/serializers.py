@@ -98,19 +98,18 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
 
-    def get_ingredient_id(self, instance):
+    def get_id(self, instance):
         return instance.ingredient.id
 
-    def get_ingredient_name(self, instance):
+    def get_name(self, instance):
         return instance.ingredient.name
 
-    def get_ingredient_measurement_unit(self, instance):
+    def get_measurement_unit(self, instance):
         return instance.ingredient.measurement_unit
 
-    id = serializers.SerializerMethodField(method_name="get_ingredient_id")
-    name = serializers.SerializerMethodField(method_name="get_ingredient_name")
-    measurement_unit = serializers.SerializerMethodField(
-        method_name="get_ingredient_measurement_unit")
+    id = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = IngredientRecipe
@@ -137,17 +136,17 @@ class IngredientRecipeMiniSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
 
-    def is_fav(self, instance):
+    def get_is_favorited(self, instance):
         user = self.context['request'].user
         recipe = instance.id
         return user.favorites.filter(recipe=recipe).exists()
 
-    def is_in_cart(self, instance):
+    def get_is_in_shopping_cart(self, instance):
         user = self.context['request'].user
         recipe = instance.id
         return user.shopping_carts.filter(recipe=recipe).exists()
 
-    def get_ingredients_with_amount(self, instance):
+    def get_ingredients(self, instance):
         '''
         Функция для получения ингредиента и его количества,
         но без вложенности.
@@ -156,12 +155,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         queryset = IngredientRecipe.objects.filter(recipe=recipe)
         return IngredientRecipeSerializer(queryset, many=True).data
 
-    is_favorited = SerializerMethodField(method_name='is_fav')
-    is_in_shopping_cart = SerializerMethodField(method_name='is_in_cart')
+    is_favorited = SerializerMethodField()
+    is_in_shopping_cart = SerializerMethodField()
     tags = TagSerializer(many=True, required=True)
     author = CustomUserSerializer(many=False, read_only=True)
-    ingredients = SerializerMethodField(
-        method_name="get_ingredients_with_amount")
+    ingredients = SerializerMethodField()
     image = Base64ImageField()
 
     class Meta:
@@ -269,24 +267,27 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(UserSerializer):
 
-    def is_sub(self, instance):
-        user = self.context['request'].user
-        author = instance.id
-        return user.subscriber.filter(author=author).exists()
+    def get_is_subscribed(self, instance):
+        request = self.context['request']
+        return (request
+                and request.user.is_authenticated
+                and request.user.subscriber.filter(
+                    author=instance.id
+                ).exists())
 
-    def rec_count(self, instance):
+    def get_recipes_count(self, instance):
         return Recipe.objects.filter(author=instance.id).count()
 
-    def recipe_limit(self, instance):
+    def get_recipes(self, instance):
         limit = self.context['request'].query_params.get('recipes_limit', None)
         recipes = Recipe.objects.filter(author=instance.id)
         if limit:
             recipes = recipes[:int(limit)]
         return RecipeMiniSerializer(recipes, many=True).data
 
-    is_subscribed = SerializerMethodField(method_name='is_sub')
-    recipes = SerializerMethodField(method_name='recipe_limit')
-    recipes_count = SerializerMethodField(method_name='rec_count')
+    is_subscribed = SerializerMethodField()
+    recipes = SerializerMethodField()
+    recipes_count = SerializerMethodField()
 
     class Meta:
         model = User
