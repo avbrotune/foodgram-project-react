@@ -89,11 +89,11 @@ class IngredientViewSet(mixins.ListModelMixin,
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     http_method_names = ["get", "post", "patch", "head", "delete"]
 
     def get_queryset(self):
+        queryset = Recipe.objects.all()
         is_favorited = self.request.query_params.get('is_favorited', None)
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart', None)
