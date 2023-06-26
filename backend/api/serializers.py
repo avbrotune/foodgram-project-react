@@ -203,10 +203,19 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance = Recipe.objects.create(**validated_data)
+        ingredients_in_recipe = []
         for ingredient in ingredients:
-            IngredientRecipe.objects.create(
-                ingredient=ingredient["id"],
-                recipe=instance, amount=ingredient["amount"])
+            ingredients_in_recipe.append(
+                IngredientRecipe(
+                    ngredient=ingredient["id"],
+                    recipe=instance,
+                    amount=ingredient["amount"]
+                )
+            )
+
+        IngredientRecipe.objects.bulk_create(
+            ingredients_in_recipe
+        )
         for tag in tags:
             instance.tags.add(tag)
         return instance
