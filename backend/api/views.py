@@ -118,11 +118,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeCreatePatchSerializer
         return RecipeSerializer
 
-    # def perform_create(self, serializer):
-    #     serializer.save(
-    #         author=self.request.user,
-    #     )
-
     def get_permissions(self):
         if self.action in {'favorite',
                            'download_shopping_cart', 'shopping_cart'}:
