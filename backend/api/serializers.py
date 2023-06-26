@@ -50,9 +50,12 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 class CustomUserSerializer(UserSerializer):
 
     def is_sub(self, instance):
-        user = self.context['request'].user
-        author = instance.id
-        return user.subscriber.filter(author=author).exists()
+        request = self.context['request']
+        return (request
+                and request.user.is_authenticated
+                and request.user.subscriber.filter(
+                    author=instance
+                ).exists())
 
     is_subscribed = SerializerMethodField(method_name='is_sub')
 
@@ -145,6 +148,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return user.shopping_carts.filter(recipe=recipe).exists()
 
     def get_ingredients_with_amount(self, instance):
+        '''
+        Функция для получения ингредиента и его количества,
+        но без вложенности.
+        '''
         recipe = instance.id
         queryset = IngredientRecipe.objects.filter(recipe=recipe)
         return IngredientRecipeSerializer(queryset, many=True).data
