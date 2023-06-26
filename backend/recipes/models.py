@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.core.validators import (
     MaxValueValidator, MinValueValidator, RegexValidator)
 from django.db import models
@@ -82,14 +83,15 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
     )
-    color = models.CharField(
-        max_length=7,
-        unique=True,
-        validators=[RegexValidator(
-            regex='^#[0-9a-fA-F]{6}',
-            message='Введите HEX цвет в формате #xxxxxx'
-        )],
-    )
+    color = ColorField(default='#FF0000')
+    # color = models.CharField(
+    #     max_length=7,
+    #     unique=True,
+    #     validators=[RegexValidator(
+    #         regex='^#[0-9a-fA-F]{6}',
+    #         message='Введите HEX цвет в формате #xxxxxx'
+    #     )],
+    # )
     slug = models.CharField(
         max_length=200,
         unique=True,
