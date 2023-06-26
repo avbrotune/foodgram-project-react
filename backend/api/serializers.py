@@ -213,11 +213,13 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
                 )
         return data
 
-    @staticmethod
-    def create(validated_data):
+    def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        instance = Recipe.objects.create(**validated_data)
+        instance = Recipe.objects.create(
+            **validated_data,
+            author=self.context['request'].user.id
+        )
         ingredients_in_recipe = []
         for ingredient in ingredients:
             ingredients_in_recipe.append(
