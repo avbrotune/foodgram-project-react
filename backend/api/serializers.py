@@ -233,8 +233,10 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # на super().update(instance, validated_data)
-        # The `.update()` method does not support writable nested fields by default.
-        # Write an explicit `.update()` method for serializer `api.serializers.RecipeCreatePatchSerializer`,
+        # The `.update()` method does not support
+        # writable nested fields by default.
+        # Write an explicit `.update()` method for serializer
+        # `api.serializers.RecipeCreatePatchSerializer`,
         # or set `read_only=True` on nested serializer fields.
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
