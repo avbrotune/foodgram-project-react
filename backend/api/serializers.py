@@ -198,6 +198,9 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         )
 
     def validate_ingredients(self, data):
+        # А если пришли ингредиенты, которых нет в бд -
+        # Будет также ошибка валидации
+        # У пользователей нет права создавать ингредиенты по ТЗ
         for ingredient in data:
             if ("id" not in ingredient.keys()
                     or "amount" not in ingredient.keys()):
@@ -229,13 +232,13 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.image = validated_data.get('image', instance.image)
-        instance.cooking_time = validated_data.get(
-            'cooking_time',
-            instance.cooking_time
-        )
+        # instance.name = validated_data.get('name', instance.name)
+        # instance.text = validated_data.get('text', instance.text)
+        # instance.image = validated_data.get('image', instance.image)
+        # instance.cooking_time = validated_data.get(
+        #     'cooking_time',
+        #     instance.cooking_time
+        # )
         if validated_data.get('ingredients'):
             IngredientRecipe.objects.filter(recipe=instance).delete()
             ingredients = validated_data.get('ingredients')
@@ -248,8 +251,9 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
             tags = validated_data.get('tags')
             for tag in tags:
                 instance.tags.add(tag)
-        instance.save()
-        return instance
+        # instance.save()
+        # return instance
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipeSerializer(
