@@ -59,7 +59,7 @@ class CustomUserViewSet(UserViewSet):
                 status=status.HTTP_400_BAD_REQUEST)
 
     def get_permissions(self):
-        if self.action in ('subscriptions', 'subscribe'):
+        if self.action in {'subscriptions', 'subscribe'}:
             return [IsAuthenticated(), ]
         return [AllowAny(), ]
 
@@ -94,7 +94,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "head", "delete"]
 
     def get_queryset(self):
-        queryset = Recipe.objects.all()
         is_favorited = self.request.query_params.get('is_favorited', None)
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart', None)
@@ -125,8 +124,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.action in ('favorite',
-                           'download_shopping_cart', 'shopping_cart'):
+        if self.action in {'favorite',
+                           'download_shopping_cart', 'shopping_cart'}:
             return [IsAuthenticated(), ]
         return [AdminOrAuthorOrReadOnly(), ]
 
