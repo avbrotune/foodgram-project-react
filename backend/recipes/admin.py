@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.utils.html import format_html
+# from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from recipes.models import (Favorite, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Subscription, Tag)
@@ -18,9 +19,15 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description="Изображение блюда")
     def image_tag(self, obj):
-
-        return format_html('<img src="{}" style="width: 130px; \
-                           height: 100px"/>'.format(obj.image.url))
+        # ex. the name of column is "image"
+        if obj.image:
+            return mark_safe('<img src="{0}" width="130" \
+                             height="130" style="object-fit:contain"\
+                              />'.format(obj.image.url))
+        else:
+            return '(No image)'
+        # return format_html('<img src="{}" style="width: 130px; \
+        #                    height: 100px"/>'.format(obj.image.url))
 
     @admin.display(description="Добавлено в избранное, раз")
     def show_favorite(self, obj):
