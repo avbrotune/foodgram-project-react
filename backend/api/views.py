@@ -161,23 +161,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         res[name] = [ingredient.measurement_unit,
                                      ingredient_recipe.amount]
         content = []
-        # filename = "Список покупок.txt"
         for obj in sorted(res.items()):
             content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n')
-        # with open('Список покупок.txt', 'w') as f:
-        #     for obj in sorted(res.items()):
-        #         f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
-        #     f.close()
-
         return HttpResponse(content,
                             content_type='text/plain',
                             status=status.HTTP_200_OK)
-        # response = Response(content,
-        #                     content_type='text/plain',
-        #                     status=status.HTTP_200_OK)
-        # response['Content-Disposition'] = 'attachment; \
-        #     filename={0}'.format(filename)
-        # return response
 
     @action(['post', 'delete'], detail=True)
     def shopping_cart(self, request, *args, **kwargs):
