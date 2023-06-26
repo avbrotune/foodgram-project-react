@@ -199,7 +199,8 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
                 )
         return data
 
-    def create(self, validated_data):
+    @staticmethod
+    def create(validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance = Recipe.objects.create(**validated_data)
