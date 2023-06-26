@@ -61,7 +61,7 @@ class CustomUserViewSet(UserViewSet):
     def get_permissions(self):
         if self.action in ('subscriptions', 'subscribe'):
             return [IsAuthenticated(), ]
-        # return super().get_permissions()
+        return super().get_permissions()
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
