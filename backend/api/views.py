@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import mixins, status, viewsets
@@ -162,13 +163,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         content = []
         # filename = "Список покупок.txt"
         for obj in sorted(res.items()):
-            content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}')
+            content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n')
         # with open('Список покупок.txt', 'w') as f:
         #     for obj in sorted(res.items()):
         #         f.write(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\n')
         #     f.close()
 
-        return Response(content,
+        return HttpResponse(content,
                         content_type='text/plain',
                         status=status.HTTP_200_OK)
         # response = Response(content,
