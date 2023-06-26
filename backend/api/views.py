@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from api.serializers import (RecipeCreatePatchSerializer, RecipeMiniSerializer,
@@ -61,7 +61,7 @@ class CustomUserViewSet(UserViewSet):
     def get_permissions(self):
         if self.action in ('subscriptions', 'subscribe'):
             return [IsAuthenticated(), ]
-        return super().get_permissions()
+        return [AllowAny(),]
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
