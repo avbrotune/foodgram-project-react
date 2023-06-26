@@ -5,7 +5,7 @@ from api.views import (
 
 router = routers.DefaultRouter()
 
-router.register(r'users', CustomUserViewSet)
+router.register(r'users', CustomUserViewSet, basename="user")
 router.register(r'tags', TagViewSet, basename="tag")
 router.register(r'recipes', RecipeViewSet, basename="recipe")
 router.register(r'ingredients', IngredientViewSet, basename="ingridient")
