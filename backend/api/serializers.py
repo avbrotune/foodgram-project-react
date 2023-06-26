@@ -54,7 +54,7 @@ class CustomUserSerializer(UserSerializer):
         return (request
                 and request.user.is_authenticated
                 and request.user.subscriber.filter(
-                    author=instance
+                    author=instance.id
                 ).exists())
 
     is_subscribed = SerializerMethodField(method_name='is_sub')
@@ -232,13 +232,17 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # instance.name = validated_data.get('name', instance.name)
-        # instance.text = validated_data.get('text', instance.text)
-        # instance.image = validated_data.get('image', instance.image)
-        # instance.cooking_time = validated_data.get(
-        #     'cooking_time',
-        #     instance.cooking_time
-        # )
+        # на super().update(instance, validated_data)
+        # The `.update()` method does not support writable nested fields by default.
+        # Write an explicit `.update()` method for serializer `api.serializers.RecipeCreatePatchSerializer`,
+        # or set `read_only=True` on nested serializer fields.
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.image = validated_data.get('image', instance.image)
+        instance.cooking_time = validated_data.get(
+            'cooking_time',
+            instance.cooking_time
+        )
         if validated_data.get('ingredients'):
             IngredientRecipe.objects.filter(recipe=instance).delete()
             ingredients = validated_data.get('ingredients')
@@ -251,9 +255,8 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
             tags = validated_data.get('tags')
             for tag in tags:
                 instance.tags.add(tag)
-        # instance.save()
-        # return instance
-        return super().update(instance, validated_data)
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return RecipeSerializer(
