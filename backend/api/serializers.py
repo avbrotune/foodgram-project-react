@@ -137,14 +137,20 @@ class IngredientRecipeMiniSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, instance):
-        user = self.context['request'].user
-        recipe = instance.id
-        return user.favorites.filter(recipe=recipe).exists()
+        request = self.context['request']
+        return (request
+                and request.user.is_authenticated
+                and request.user.favorites.filter(
+                    recipe=instance.id
+                ).exists())
 
     def get_is_in_shopping_cart(self, instance):
-        user = self.context['request'].user
-        recipe = instance.id
-        return user.shopping_carts.filter(recipe=recipe).exists()
+        request = self.context['request']
+        return (request
+                and request.user.is_authenticated
+                and request.user.shopping_carts.filter(
+                    recipe=instance.id
+                ).exists())
 
     def get_ingredients(self, instance):
         '''
