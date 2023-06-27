@@ -295,7 +295,7 @@ class SubscriptionSerializer(UserSerializer):
         return data
 
     class Meta:
-        model = User
+        model = Subscription
         fields = (
             "username",
             "email",
@@ -305,4 +305,10 @@ class SubscriptionSerializer(UserSerializer):
             "is_subscribed",
             "recipes",
             "recipes_count"
+        )
+        read_only_fields = (
+            "email",
+            "id",
+            "first_name",
+            "last_name"
         )
