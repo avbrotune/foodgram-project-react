@@ -42,18 +42,7 @@ class CustomUserViewSet(UserViewSet):
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
-        # if Subscription.objects.filter(user=user, author=author).exists():
-        #     return Response(
-        #         {'error': "Вы уже подписаны на пользователя."},
-        #         status=status.HTTP_400_BAD_REQUEST)
-        # if user == author:
-        #     return Response(
-        #         {'error': "Нельзя подписаться на самого себя."},
-        #         status=status.HTTP_400_BAD_REQUEST)
-        # sub = Subscription.objects.create(user=user, author=author)
         Subscription.objects.create(user=user, author=author)
-        # serializer = SubscriptionSerializer(
-        #     sub.author, context={'request': request}, many=False)
         return Response(serializer.validated_data,
                         status=status.HTTP_201_CREATED)
 
