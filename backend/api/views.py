@@ -148,11 +148,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def create_shopping_list(ingredient_list):
         content = []
         for obj in ingredient_list:
-            content.append(
-                f'{obj["ingredient__name"]}\
-                ({obj["ingredient__measurement_unit"]})\
-                - {obj["ingredient_amount"]}\r\n'
-            )
+            name = obj["ingredient__name"]
+            unit = obj["ingredient__measurement_unit"]
+            amount = obj["ingredient_amount"]
+            content.append(f'{name} ({unit}) - {amount}\r\n')
         return HttpResponse(
             content,
             content_type='text/plain',
