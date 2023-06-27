@@ -36,7 +36,7 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, *args, **kwargs):
         '''Подписка на автора'''
         user = request.user
-        author = self.kwargs.get('id')
+        author = self.get_object()
         serializer = SubscriptionSerializer(
             data={'author': author, 'user': user},
             context={'request': request}
