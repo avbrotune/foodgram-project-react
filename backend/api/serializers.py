@@ -2,7 +2,8 @@ import base64
 
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 
 from recipes.models import (Ingredient, IngredientRecipe,
@@ -260,18 +261,9 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscriptionSerializer(UserSerializer):
-    is_subscribed = SerializerMethodField()
+class SubscriptionSerializer(CustomUserSerializer):
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
-
-    def get_is_subscribed(self, instance):
-        request = self.context['request']
-        return (request
-                and request.user.is_authenticated
-                and request.user.subscriber.filter(
-                    author=instance.id
-                ).exists())
 
     def get_recipes_count(self, instance):
         return Recipe.objects.filter(author=instance.id).count()
@@ -283,15 +275,30 @@ class SubscriptionSerializer(UserSerializer):
             recipes = recipes[:int(limit)]
         return RecipeMiniSerializer(recipes, many=True).data
 
-    class Meta:
-        model = User
-        fields = (
-            "username",
-            "email",
-            "id",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "recipes",
-            "recipes_count"
+    def validate(self, data):
+        author = self.instance
+        user = self.context.get('request').user
+
+        if Subscription.objects.filter(author=author, user=user).exists():
+            raise ValidationError(
+                default_detail='Вы уже подписаны на этого автора!',
+                default_code=status.HTTP_400_BAD_REQUEST,
+            )
+        if user == author:
+            raise ValidationError(
+                default_detail='Нелья подписаться на самого себя!',
+                default_code=status.HTTP_400_BAD_REQUEST,
+            )
+        return data
+
+    class Meta(CustomUserSerializer.Meta):
+        fields = CustomUserSerializer.Meta.fields + (
+            'recipes_count',
+            'recipes',
+        )
+        read_only_fields = (
+            'email',
+            'username',
+            'first_name',
+            'last_name',
         )
