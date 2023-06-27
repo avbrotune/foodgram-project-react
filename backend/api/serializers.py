@@ -285,11 +285,11 @@ class SubscriptionSerializer(UserSerializer):
 
     def validate(self, data):
         user = self.context.get('request').user
-        if user == data["author"]:
+        if user == data["id"]:
             raise serializers.ValidationError(
                 "Нельзя подписаться на самого себя.")
         if Subscription.objects.filter(
-                user=user, author=data["author"]).exists():
+                user=user, author=data["id"]).exists():
             raise serializers.ValidationError(
                 "Вы уже подписаны на пользователя.")
         return data
