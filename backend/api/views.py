@@ -166,7 +166,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # res = dict()
         # for cart_object in cart:
         #     for ingredient in cart_object.recipe.ingredients.all():
-        #         for ingredient_recipe in ingredient.ingredient_amounts.filter(
+        #         for ingredient_recipe in ingredient.
+        # ingredient_amounts.filter(
         #                 recipe=cart_object.recipe):
         #             name = ingredient.name.capitalize()
         #             if name in res:
