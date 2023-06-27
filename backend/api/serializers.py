@@ -283,17 +283,6 @@ class SubscriptionSerializer(UserSerializer):
             recipes = recipes[:int(limit)]
         return RecipeMiniSerializer(recipes, many=True).data
 
-    def validate(self, data):
-        user = self.context.get('request').user
-        if user == data["id"]:
-            raise serializers.ValidationError(
-                "Нельзя подписаться на самого себя.")
-        if Subscription.objects.filter(
-                user=user, author=data["id"]).exists():
-            raise serializers.ValidationError(
-                "Вы уже подписаны на пользователя.")
-        return data
-
     class Meta:
         model = User
         fields = (
@@ -305,11 +294,4 @@ class SubscriptionSerializer(UserSerializer):
             "is_subscribed",
             "recipes",
             "recipes_count"
-        )
-        read_only_fields = (
-            "email",
-            "id",
-            "first_name",
-            "last_name",
-            "username"
         )
