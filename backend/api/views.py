@@ -153,9 +153,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 ({obj["ingredient__measurement_unit"]})\
                 - {obj["ingredient_amount"]}\r\n'
             )
-        return HttpResponse(content,
-                            content_type='text/plain',
-                            status=status.HTTP_200_OK)
+        return HttpResponse(
+            content,
+            content_type='text/plain',
+            status=status.HTTP_200_OK)
 
     @action(['get'], detail=False)
     def download_shopping_cart(self, request, *args, **kwargs):
