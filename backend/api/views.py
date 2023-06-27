@@ -39,8 +39,7 @@ class CustomUserViewSet(UserViewSet):
         author = self.get_object()
         serializer = SubscriptionSerializer(
             data={'author': author, 'user': user},
-            context={'request': request}
-        )
+            context={'request': request})
         serializer.is_valid(raise_exception=True)
         sub = Subscription.objects.create(user=user, author=author)
         serializer = SubscriptionSerializer(
