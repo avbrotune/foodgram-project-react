@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Sum, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
@@ -11,7 +11,7 @@ from api.serializers import (RecipeCreatePatchSerializer, RecipeMiniSerializer,
                              IngredientSerializer, RecipeSerializer,
                              TagSerializer, SubscriptionSerializer)
 from api.permissions import AdminOrAuthorOrReadOnly
-from recipes.models import (Favorite, Ingredient,
+from recipes.models import (Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag, Subscription, ShoppingCart)
 from users.models import User
 
@@ -144,27 +144,40 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response({'error': "Рецепт отсутствует в избанном."},
                             status=status.HTTP_400_BAD_REQUEST)
 
+    @staticmethod
+    def create_shopping_list(ingredient_list):
+        content = []
+        for obj in ingredient_list:
+            content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n')
+        response = HttpResponse(content,
+                                content_type='text/plain',
+                                status=status.HTTP_200_OK)
+        return response
+
     @action(['get'], detail=False)
     def download_shopping_cart(self, request, *args, **kwargs):
-        user = self.request.user
-        cart = ShoppingCart.objects.filter(user=user)
-        res = dict()
-        for cart_object in cart:
-            for ingredient in cart_object.recipe.ingredients.all():
-                for ingredient_recipe in ingredient.ingredient_amounts.filter(
-                        recipe=cart_object.recipe):
-                    name = ingredient.name.capitalize()
-                    if name in res:
-                        res[name][1] += ingredient_recipe.amount
-                    else:
-                        res[name] = [ingredient.measurement_unit,
-                                     ingredient_recipe.amount]
-        content = []
-        for obj in sorted(res.items()):
-            content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n')
-        return HttpResponse(content,
-                            content_type='text/plain',
-                            status=status.HTTP_200_OK)
+        # user = self.request.user
+        ingredient_list = IngredientRecipe.objects.filter(
+            recipe__shopping_carts__user=request.user).values(
+            'ingredient__name', 'ingredient__measurement_unit').annotate(
+            ingredient_amount=Sum('amount')).order_by(
+            'ingredient__name')
+        # cart = ShoppingCart.objects.filter(user=user)
+        # res = dict()
+        # for cart_object in cart:
+        #     for ingredient in cart_object.recipe.ingredients.all():
+        #         for ingredient_recipe in ingredient.ingredient_amounts.filter(
+        #                 recipe=cart_object.recipe):
+        #             name = ingredient.name.capitalize()
+        #             if name in res:
+        #                 res[name][1] += ingredient_recipe.amount
+        #             else:
+        #                 res[name] = [ingredient.measurement_unit,
+        #                              ingredient_recipe.amount]
+        # content = []
+        # for obj in sorted(res.items()):
+        #     content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n')
+        return RecipeViewSet.create_shopping_list(ingredient_list)
 
     @action(['post', 'delete'], detail=True)
     def shopping_cart(self, request, *args, **kwargs):
