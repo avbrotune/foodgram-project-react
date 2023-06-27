@@ -150,38 +150,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for obj in ingredient_list:
             content.append(
                 f'{obj["ingredient__name"]}\
-                      ({obj["ingredient__measurement_unit"]})\
-                          - {obj["ingredient_amount"]}\r\n'
+                ({obj["ingredient__measurement_unit"]})\
+                - {obj["ingredient_amount"]}\r\n'
             )
-        response = HttpResponse(content,
-                                content_type='text/plain',
-                                status=status.HTTP_200_OK)
-        return response
+        return HttpResponse(content,
+                            content_type='text/plain',
+                            status=status.HTTP_200_OK)
 
     @action(['get'], detail=False)
     def download_shopping_cart(self, request, *args, **kwargs):
-        # user = self.request.user
         ingredient_list = IngredientRecipe.objects.filter(
             recipe__shopping_carts__user=request.user).values(
             'ingredient__name', 'ingredient__measurement_unit').annotate(
             ingredient_amount=Sum('amount')).order_by(
             'ingredient__name')
-        # cart = ShoppingCart.objects.filter(user=user)
-        # res = dict()
-        # for cart_object in cart:
-        #     for ingredient in cart_object.recipe.ingredients.all():
-        #         for ingredient_recipe in ingredient.
-        # ingredient_amounts.filter(
-        #                 recipe=cart_object.recipe):
-        #             name = ingredient.name.capitalize()
-        #             if name in res:
-        #                 res[name][1] += ingredient_recipe.amount
-        #             else:
-        #                 res[name] = [ingredient.measurement_unit,
-        #                              ingredient_recipe.amount]
-        # content = []
-        # for obj in sorted(res.items()):
-        #     content.append(f'{obj[0]} ({obj[1][0]}) - {obj[1][1]}\r\n')
         return RecipeViewSet.create_shopping_list(ingredient_list)
 
     @action(['post', 'delete'], detail=True)
