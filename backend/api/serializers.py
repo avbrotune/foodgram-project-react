@@ -20,7 +20,6 @@ class Base64ImageField(serializers.ImageField):
 
 
 class RecipeMiniSerializer(serializers.ModelSerializer):
-
     image = Base64ImageField()
 
     class Meta:
@@ -48,6 +47,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
+    is_subscribed = SerializerMethodField()
 
     def get_is_subscribed(self, instance):
         request = self.context['request']
@@ -56,8 +56,6 @@ class CustomUserSerializer(UserSerializer):
                 and request.user.subscriber.filter(
                     author=instance.id
                 ).exists())
-
-    is_subscribed = SerializerMethodField()
 
     class Meta:
         model = User
@@ -97,6 +95,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
 
     def get_id(self, instance):
         return instance.ingredient.id
@@ -106,10 +107,6 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
     def get_measurement_unit(self, instance):
         return instance.ingredient.measurement_unit
-
-    id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-    measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = IngredientRecipe
@@ -122,7 +119,6 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeMiniSerializer(serializers.ModelSerializer):
-
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), many=False)
 
@@ -135,6 +131,12 @@ class IngredientRecipeMiniSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    is_favorited = SerializerMethodField()
+    is_in_shopping_cart = SerializerMethodField()
+    tags = TagSerializer(many=True, required=True)
+    author = CustomUserSerializer(many=False, read_only=True)
+    ingredients = SerializerMethodField()
+    image = Base64ImageField()
 
     def get_is_favorited(self, instance):
         request = self.context['request']
@@ -161,13 +163,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         queryset = IngredientRecipe.objects.filter(recipe=recipe)
         return IngredientRecipeSerializer(queryset, many=True).data
 
-    is_favorited = SerializerMethodField()
-    is_in_shopping_cart = SerializerMethodField()
-    tags = TagSerializer(many=True, required=True)
-    author = CustomUserSerializer(many=False, read_only=True)
-    ingredients = SerializerMethodField()
-    image = Base64ImageField()
-
     class Meta:
         model = Recipe
         fields = (
@@ -190,21 +185,7 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeMiniSerializer(many=True)
     image = Base64ImageField()
 
-    class Meta:
-        model = Recipe
-        fields = (
-            "tags",
-            "ingredients",
-            "name",
-            "image",
-            "text",
-            "cooking_time",
-        )
-
     def validate_ingredients(self, data):
-        # А если пришли ингредиенты, которых нет в бд -
-        # Будет также ошибка валидации
-        # У пользователей нет права создавать ингредиенты по ТЗ
         for ingredient in data:
             if ("id" not in ingredient.keys()
                     or "amount" not in ingredient.keys()):
@@ -238,12 +219,6 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # на super().update(instance, validated_data)
-        # The `.update()` method does not support
-        # writable nested fields by default.
-        # Write an explicit `.update()` method for serializer
-        # `api.serializers.RecipeCreatePatchSerializer`,
-        # or set `read_only=True` on nested serializer fields.
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.image = validated_data.get('image', instance.image)
@@ -272,8 +247,22 @@ class RecipeCreatePatchSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         ).data
 
+    class Meta:
+        model = Recipe
+        fields = (
+            "tags",
+            "ingredients",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
+
 
 class SubscriptionSerializer(UserSerializer):
+    is_subscribed = SerializerMethodField()
+    recipes = SerializerMethodField()
+    recipes_count = SerializerMethodField()
 
     def get_is_subscribed(self, instance):
         request = self.context['request']
@@ -292,10 +281,6 @@ class SubscriptionSerializer(UserSerializer):
         if limit:
             recipes = recipes[:int(limit)]
         return RecipeMiniSerializer(recipes, many=True).data
-
-    is_subscribed = SerializerMethodField()
-    recipes = SerializerMethodField()
-    recipes_count = SerializerMethodField()
 
     class Meta:
         model = User

@@ -20,16 +20,27 @@ class CustomUserViewSet(UserViewSet):
 
     @action(['get'], detail=False)
     def subscriptions(self, request, *args, **kwargs):
-
-        queryset = User.objects.filter(subscriptions__user=self.request.user)
+        queryset = User.objects.filter(
+            subscriptions__user=self.request.user)
         page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = SubscriptionSerializer(
-                page, context={'request': request}, many=True)
-            return self.get_paginated_response(serializer.data)
         serializer = SubscriptionSerializer(
-            queryset, context={'request': request}, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            page,
+            context={'request': request},
+            many=True if page is not None else False
+        )
+        return self.get_paginated_response(
+            serializer.data) if page else Response(
+            serializer.data, status=status.HTTP_200_OK)
+
+        # queryset = User.objects.filter(subscriptions__user=self.request.user)
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #     serializer = SubscriptionSerializer(
+        #         page, context={'request': request}, many=True)
+        #     return self.get_paginated_response(serializer.data)
+        # serializer = SubscriptionSerializer(
+        #     queryset, context={'request': request}, many=True)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Если этот метод разделить, будет работать только тот,
     # что по коду ниже. Согласно документации, в тело запроса subscribe,
@@ -37,32 +48,35 @@ class CustomUserViewSet(UserViewSet):
     # только на выдачу объекта пользователя, поэтому я прописал проверки
     # во вьюхе.
 
-    @action(['post', 'delete'], detail=True)
+    @action(['post'], detail=True)
     def subscribe(self, request, *args, **kwargs):
         user = self.request.user
         author = self.get_object()
-        if request.method == 'POST':
-            if Subscription.objects.filter(user=user, author=author).exists():
-                return Response(
-                    {'error': "Вы уже подписаны на пользователя."},
-                    status=status.HTTP_400_BAD_REQUEST)
-            if user == author:
-                return Response(
-                    {'error': "Нельзя подписаться на самого себя."},
-                    status=status.HTTP_400_BAD_REQUEST)
-            sub = Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(
-                sub.author, context={'request': request}, many=False)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            if Subscription.objects.filter(user=user, author=author).exists():
-                instance = get_object_or_404(
-                    Subscription, user=user, author=author)
-                self.perform_destroy(instance)
-                return Response(status=status.HTTP_204_NO_CONTENT)
+        if Subscription.objects.filter(user=user, author=author).exists():
             return Response(
-                {'error': "Подписка на пользователя отсутствует."},
+                {'error': "Вы уже подписаны на пользователя."},
                 status=status.HTTP_400_BAD_REQUEST)
+        if user == author:
+            return Response(
+                {'error': "Нельзя подписаться на самого себя."},
+                status=status.HTTP_400_BAD_REQUEST)
+        sub = Subscription.objects.create(user=user, author=author)
+        serializer = SubscriptionSerializer(
+            sub.author, context={'request': request}, many=False)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, *args, **kwargs):
+        user = self.request.user
+        author = self.get_object()
+        if Subscription.objects.filter(user=user, author=author).exists():
+            instance = get_object_or_404(
+                Subscription, user=user, author=author)
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'error': "Подписка на пользователя отсутствует."},
+            status=status.HTTP_400_BAD_REQUEST)
 
     def get_permissions(self):
         if self.action in {'subscriptions', 'subscribe'}:
