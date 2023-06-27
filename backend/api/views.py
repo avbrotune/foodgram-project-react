@@ -32,24 +32,9 @@ class CustomUserViewSet(UserViewSet):
             serializer.data) if page else Response(
             serializer.data, status=status.HTTP_200_OK)
 
-        # queryset = User.objects.filter(subscriptions__user=self.request.user)
-        # page = self.paginate_queryset(queryset)
-        # if page is not None:
-        #     serializer = SubscriptionSerializer(
-        #         page, context={'request': request}, many=True)
-        #     return self.get_paginated_response(serializer.data)
-        # serializer = SubscriptionSerializer(
-        #     queryset, context={'request': request}, many=True)
-        # return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # Если этот метод разделить, будет работать только тот,
-    # что по коду ниже. Согласно документации, в тело запроса subscribe,
-    # что post, что delete - ничего не передается. Сериализатор работает
-    # только на выдачу объекта пользователя, поэтому я прописал проверки
-    # во вьюхе.
-
     @action(['post'], detail=True)
     def subscribe(self, request, *args, **kwargs):
+        '''Подписка на автора'''
         user = self.request.user
         author = self.get_object()
         if Subscription.objects.filter(user=user, author=author).exists():
@@ -67,6 +52,7 @@ class CustomUserViewSet(UserViewSet):
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, *args, **kwargs):
+        '''Удаление подписки на автора'''
         user = self.request.user
         author = self.get_object()
         if Subscription.objects.filter(user=user, author=author).exists():
