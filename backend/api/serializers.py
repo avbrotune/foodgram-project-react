@@ -5,7 +5,8 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag, Subscription
+from recipes.models import (Ingredient, IngredientRecipe,
+                            Recipe, Tag, Subscription)
 from users.models import User
 
 
