@@ -31,7 +31,7 @@ class CustomUserViewSet(UserViewSet):
             queryset, context={'request': request}, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(['post', 'delete'], detail=True)
+    @action(['post'], detail=True)
     def subscribe(self, request, *args, **kwargs):
         user = self.request.user
         author = self.get_object()
@@ -48,15 +48,19 @@ class CustomUserViewSet(UserViewSet):
             serializer = SubscriptionSerializer(
                 sub.author, context={'request': request}, many=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            if Subscription.objects.filter(user=user, author=author).exists():
-                instance = get_object_or_404(
-                    Subscription, user=user, author=author)
-                self.perform_destroy(instance)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response(
-                {'error': "Подписка на пользователя отсутствует."},
-                status=status.HTTP_400_BAD_REQUEST)
+
+    @action(['delete'], detail=True)
+    def subscribe(self, request, *args, **kwargs):
+        user = self.request.user
+        author = self.get_object()
+        if Subscription.objects.filter(user=user, author=author).exists():
+            instance = get_object_or_404(
+                Subscription, user=user, author=author)
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'error': "Подписка на пользователя отсутствует."},
+            status=status.HTTP_400_BAD_REQUEST)
 
     def get_permissions(self):
         if self.action in {'subscriptions', 'subscribe'}:
