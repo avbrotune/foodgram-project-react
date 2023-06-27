@@ -35,17 +35,24 @@ class CustomUserViewSet(UserViewSet):
     @action(['post'], detail=True)
     def subscribe(self, request, *args, **kwargs):
         '''Подписка на автора'''
-        user = self.request.user
+        user = request.user
         author = self.get_object()
-        if Subscription.objects.filter(user=user, author=author).exists():
-            return Response(
-                {'error': "Вы уже подписаны на пользователя."},
-                status=status.HTTP_400_BAD_REQUEST)
-        if user == author:
-            return Response(
-                {'error': "Нельзя подписаться на самого себя."},
-                status=status.HTTP_400_BAD_REQUEST)
-        sub = Subscription.objects.create(user=user, author=author)
+        serializer = SubscriptionSerializer(
+            data={'author': author, 'user': user},
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        # if Subscription.objects.filter(user=user, author=author).exists():
+        #     return Response(
+        #         {'error': "Вы уже подписаны на пользователя."},
+        #         status=status.HTTP_400_BAD_REQUEST)
+        # if user == author:
+        #     return Response(
+        #         {'error': "Нельзя подписаться на самого себя."},
+        #         status=status.HTTP_400_BAD_REQUEST)
+        # sub = Subscription.objects.create(user=user, author=author)
+        sub = Subscription.objects.create(**serializer.validated_data)
         serializer = SubscriptionSerializer(
             sub.author, context={'request': request}, many=False)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

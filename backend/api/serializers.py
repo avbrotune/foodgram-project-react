@@ -5,7 +5,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag, Subscription
 from users.models import User
 
 
@@ -281,6 +281,17 @@ class SubscriptionSerializer(UserSerializer):
         if limit:
             recipes = recipes[:int(limit)]
         return RecipeMiniSerializer(recipes, many=True).data
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        if user == data:
+            raise serializers.ValidationError(
+                "Нельзя подписаться на самого себя.")
+        if Subscription.objects.filter(
+                user=user, author=data).exists():
+            raise serializers.ValidationError(
+                "Вы уже подписаны на пользователя.")
+        return data
 
     class Meta:
         model = User
