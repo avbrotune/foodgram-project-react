@@ -145,7 +145,8 @@ class Subscription(models.Model):
     )
 
     def __str__(self):
-        return self.author.username
+        return f"{self.user.username}\
+            ->{self.author.username}"
 
     class Meta:
         constraints = (
