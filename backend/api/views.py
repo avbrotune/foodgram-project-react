@@ -46,7 +46,7 @@ class CustomUserViewSet(UserViewSet):
         # serializer = SubscriptionSerializer(
         #     sub.author, context={'request': request}, many=False)
         return Response("OK",
-                status=status.HTTP_201_CREATED)
+                        status=status.HTTP_201_CREATED)
 
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED)
