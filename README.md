@@ -35,3 +35,8 @@
 
 ## Автор
 [Алекс Бро](https://github.com/avbrotune/)
+
+## Сервер
+https://nomatter.hopto.org/
+Логин 1@1.ru
+Пароль 1
