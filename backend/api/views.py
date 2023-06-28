@@ -41,9 +41,13 @@ class CustomUserViewSet(UserViewSet):
             data={'author': author, 'user': user},
             context={'request': request})
         serializer.is_valid(raise_exception=True)
-        sub = Subscription.objects.create(user=user, author=author)
-        serializer = SubscriptionSerializer(
-            sub.author, context={'request': request}, many=False)
+        serializer.save()
+        # sub = Subscription.objects.create(user=user, author=author)
+        # serializer = SubscriptionSerializer(
+        #     sub.author, context={'request': request}, many=False)
+        return Response("OK",
+                status=status.HTTP_201_CREATED)
+
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED)
 
